@@ -5,7 +5,15 @@
 To get started with `ekiliRelay`, download the SDK as a zip file and include it in your project.
 
 1. **Download the SDK from the button below:**
-   [Download SDK](https://relay.ekilie.com/sdk/ekiliRelay-js-sdk-v.0.0.zip) <!-- Replace with actual download link -->
+   [Download SDK](https://relay.ekilie.com/sdk/ekiliRelay-js-sdk-v.0.0.zip) 
+
+
+   **Npm**
+
+    ```javascript
+    npm i ekili-relay;
+    ```
+
 
 2. **Unzip the downloaded file.**
 
