@@ -2,7 +2,7 @@
 
 ## Installation | JS
 
-To get started with `ekiliRelay`, download the SDK as a zip file and include it in your project.
+To get started with `ekiliRelay`, download the SDK as a zip file or use npm to install and include it in your project.
 
 1. **Download the SDK from the button below:**
    [Download SDK](https://relay.ekilie.com/sdk/ekiliRelay-js-sdk-v.0.0.zip) 
