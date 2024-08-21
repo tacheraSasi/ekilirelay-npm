@@ -54,6 +54,10 @@ var EkiliRelay = class {
         },
         body: JSON.stringify(data)
       });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorText}`);
+      }
       const result = await response.json();
       return result;
     } catch (error) {
