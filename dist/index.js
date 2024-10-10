@@ -24,48 +24,56 @@ __export(src_exports, {
 });
 module.exports = __toCommonJS(src_exports);
 var EkiliRelay = class {
+  apikey;
+  // The API key required for authenticating requests
   apiUrl;
-  constructor() {
+  // The URL of the API endpoint for sending emails
+  /**
+   * Constructs an instance of the EkiliRelay class.
+   * @param apikey - The API key required for authenticating requests
+   */
+  constructor(apikey) {
+    this.apikey = apikey;
     this.apiUrl = "https://relay.ekilie.com/api/index.php";
     console.log("EkiliRelay connected");
   }
   /**
-   * Sends an email using EkiliRelay.
-   * @param {string} to Email address of the recipient.
-   * @param {string} subject Subject of the email.
-   * @param {string} body Body content of the email.
-   * @param {string} from Sender's email address.
-   * @param {string} [headers] Optional headers for the email.
-   * @returns {Promise<object>} A promise resolving to the response object.
+   * Sends an email using the provided details.
+   * 
+   * @param to - The recipient's email address.
+   * @param subject - The subject of the email.
+   * @param message - The body of the email.
+   * @param headers - Optional additional headers for the email.
+   * @returns A promise that resolves to the result of the email sending operation.
    */
-  async sendEmail(to, subject, body, from, headers = "") {
+  async sendEmail(to, subject, message, headers = "") {
     const data = {
       to,
+      // Recipient's email address
       subject,
-      body,
-      from,
-      headers
+      // Subject line of the email
+      message,
+      // Body of the email
+      headers,
+      // Optional additional headers
+      apikey: this.apikey
+      // API key for authentication
     };
     try {
       const response = await fetch(this.apiUrl, {
         method: "POST",
+        // HTTP method to use
         headers: {
           "Content-Type": "application/json"
+          // Specify that we are sending JSON data
         },
         body: JSON.stringify(data)
+        // Convert the data object to a JSON string
       });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorText}`);
-      }
       const result = await response.json();
       return result;
     } catch (error) {
-      if (error instanceof Error) {
-        return { status: "error", message: error.message };
-      } else {
-        return { status: "error", message: "An unknown error occurred" };
-      }
+      return { status: "error", message: error.message };
     }
   }
 };

@@ -2,35 +2,28 @@
 
 ## Installation | JS
 
-To get started with `ekiliRelay`, download the SDK as a zip file or use npm to install and include it in your project.
+To get started with `ekiliRelay` use npm to install and include it in your project.
 
-1. **Download the SDK from the button below:**
-   [Download SDK](https://relay.ekilie.com/sdk/ekiliRelay-js-sdk-v.0.0.zip) 
-
-
-   **Npm**
+1. **Npm**
 
     ```javascript
-    npm i ekili-relay;
+    npm i ekilirelay;
     ```
 
 
-2. **Unzip the downloaded file.**
-
-3. **Import the SDK into your project:**
+2. **Import the SDK into your project:**
 
     ```javascript
-    import EkiliRelay from '../path-to/sdk/js/ekiliRelay.js';
+    import EkiliRelay from 'ekilirelay';
     ```
 
 ## Usage | JS
 
 After including the SDK, you can start using `ekiliRelay` to send emails. Here's a quick example:
 
-```html
-<script type="module">
+```js
   const sendBtn = document.getElementById("send"); // Some button
-  import EkiliRelay from '../path-to/sdk/js/ekiliRelay.js'; // Importing EkiliRelay
+  
 
   // Initialize the SDK  
   const sdk = new EkiliRelay();
@@ -50,4 +43,3 @@ After including the SDK, you can start using `ekiliRelay` to send emails. Here's
         console.log('Error:', error);
       });
   });
-</script>
