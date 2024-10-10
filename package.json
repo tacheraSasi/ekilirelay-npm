@@ -1,7 +1,7 @@
 {
   "name": "ekilirelay",
   "description": "Ekilirelay is a fast, reliable, and free email API service that allows you to send emails with ease. Whether you need to send transactional emails, notifications, or bulk messages, Ekilirelay has you covered with its simple yet powerful API.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
