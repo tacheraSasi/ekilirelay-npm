@@ -1,283 +1,340 @@
-# ekiliRelay SDK
+# ekiliRelay package
 
-## ⚠️ Security Notice
-
-**IMPORTANT:** Never expose your API key in client-side code! The API key should always be kept secure on your server.
+The **ekiliRelay package** is a lightweight JavaScript/TypeScript library designed to simplify email sending and file uploading via the EkiliRelay API. Authenticate your requests with your API key and integrate our services seamlessly into your application.
 
 ## Installation
 
-To get started with `ekiliRelay` use npm to install and include it in your project:
+Install the package using npm:
 
 ```bash
-npm i ekilirelay
+npm install ekilirelay
 ```
+
+Then, import the package into your project:
+
+```javascript
+import EkiliRelay from 'ekilirelay';
+```
+
+---
 
 ## Usage
 
-### ✅ Recommended: Server-side Implementation (Secure)
+### Vanilla JavaScript
 
-#### 1. Create an API Route
+You can use the package in any project that supports ES modules or a bundler. Below are two examples: one for sending emails and one for file uploads.
 
-First, create a secure API route on your server. Here are examples for different frameworks:
+#### Sending an Email (Vanilla JS)
 
-##### Next.js API Route (App Router):
-```typescript
-// app/api/send-email/route.ts
-import { NextResponse } from 'next/server';
-import EkiliRelay from 'ekilirelay';
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ekiliRelay Email Test</title>
+</head>
+<body>
+  <button id="sendEmailBtn">Send Email</button>
+  <script type="module">
+    import EkiliRelay from 'ekilirelay';
 
-// [SECURITY] Add rate limiting
-import { rateLimit } from '@/lib/rate-limit';
+    // Initialize the package with your API key
+    const relay = new EkiliRelay("Your-EkiliRelay-Api-Key");
 
-// [SECURITY] Add request validation
-const validateEmailRequest = (data: any) => {
-  if (!data.to || !data.subject || !data.message) {
-    return false;
-  }
-  // Add more validation as needed
-  return true;
-};
-
-export async function POST(request: Request) {
-  try {
-    // [SECURITY] Implement rate limiting
-    const limiter = await rateLimit.check(request);
-    if (!limiter.success) {
-      return NextResponse.json(
-        { status: 'error', message: 'Rate limit exceeded' },
-        { status: 429 }
-      );
-    }
-
-    // [SECURITY] Validate request body
-    const data = await request.json();
-    if (!validateEmailRequest(data)) {
-      return NextResponse.json(
-        { status: 'error', message: 'Invalid request data' },
-        { status: 400 }
-      );
-    }
-
-    const { to, subject, message, from } = data;
-    
-    // [SECURITY] API key safely stored in environment variables
-    const mailer = new EkiliRelay(process.env.RELAY_API);
-    
-    const response = await mailer.sendEmail(
-      to,
-      subject,
-      message,
-      `From: ${from}`
-    );
-
-    return NextResponse.json(response);
-  } catch (error) {
-    console.error('Email sending error:', error);
-    return NextResponse.json(
-      { status: 'error', message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-```
-
-##### Express.js Example with Security:
-```typescript
-import express from 'express';
-import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
-import EkiliRelay from 'ekilirelay';
-
-const app = express();
-
-// [SECURITY] Add basic security headers
-app.use(helmet());
-
-// [SECURITY] Add rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use('/api/send-email', limiter);
-
-// [SECURITY] Add request validation middleware
-const validateEmailRequest = (req, res, next) => {
-  const { to, subject, message } = req.body;
-  if (!to || !subject || !message) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Missing required fields'
-    });
-  }
-  next();
-};
-
-app.post('/api/send-email', 
-  express.json(), 
-  validateEmailRequest,
-  async (req, res) => {
-    try {
-      const { to, subject, message, from } = req.body;
-      const mailer = new EkiliRelay(process.env.RELAY_API);
-      
-      const response = await mailer.sendEmail(to, subject, message, `From: ${from}`);
-      res.json(response);
-    } catch (error) {
-      console.error('Email sending error:', error);
-      res.status(500).json({
-        status: 'error',
-        message: 'Internal server error'
+    document.getElementById("sendEmailBtn").addEventListener("click", () => {
+      relay.sendEmail(
+        'receiver@example.com',
+        'Test Subject',
+        'This is a test message.',
+        'From: senderName <sender@example.com>'
+      )
+      .then(response => {
+        if (response.status === 'success') {
+          console.log('Email sent successfully.');
+        } else {
+          console.error('Failed to send email:', response.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
       });
-    }
-  }
-);
+    });
+  </script>
+</body>
+</html>
 ```
 
-#### 2. Protect Your API Route
+#### Uploading a File (Vanilla JS)
 
-To secure your API route, implement these security measures:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ekiliRelay File Upload</title>
+</head>
+<body>
+  <input type="file" id="fileInput" />
+  <script type="module">
+    import EkiliRelay from 'ekilirelay';
 
-1. **Rate Limiting**
-   ```bash
-   # Next.js
-   npm install @/lib/rate-limit
+    // Initialize the package with your API key
+    const relay = new EkiliRelay("Your-EkiliRelay-Api-Key");
 
-   # Express
-   npm install express-rate-limit
-   ```
-
-2. **Environment Variables**
-   ```env
-   # .env.local or .env
-   RELAY_API=your-api-key-here
-   ```
-
-3. **Request Validation**
-   - Validate email format
-   - Check required fields
-   - Sanitize inputs
-   - Set maximum request size
-
-4. **Error Handling**
-   - Don't expose internal errors
-   - Log errors securely
-   - Return appropriate status codes
-
-5. **Security Headers**
-   ```bash
-   # Express
-   npm install helmet
-   ```
-
-6. **CORS Configuration** (if needed)
-   ```typescript
-   // Next.js
-   export const config = {
-     cors: {
-       origin: ['https://your-domain.com'],
-       methods: ['POST']
-     }
-   }
-
-   // Express
-   app.use(cors({
-     origin: 'https://your-domain.com',
-     methods: ['POST']
-   }));
-   ```
-
-#### 3. Call the API from Client-Side
-
-Then in your client-side code:
-
-```typescript
-// Your client-side component
-async function sendEmail(data) {
-  try {
-    const response = await fetch('/api/send-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+    document.getElementById('fileInput').addEventListener('change', async () => {
+      const fileInput = document.getElementById('fileInput');
+      if (fileInput.files && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        try {
+          const result = await relay.uploadFile(file);
+          if (result.status === "success") {
+            console.log("File uploaded successfully:", result);
+            // You can use result.filename and result.url here
+          } else {
+            console.error("File upload failed:", result.message);
+          }
+        } catch (error) {
+          console.error("Unexpected error:", error);
+        }
+      }
     });
+  </script>
+</body>
+</html>
+```
 
-    if (!response.ok) {
-      throw new Error('Failed to send email');
+---
+
+### ReactJS
+
+In a React application, you can use the package within your components. Below is an example using a functional component with hooks.
+
+#### Example Component for Sending an Email
+
+```jsx
+// EmailSender.jsx
+import React, { useState } from 'react';
+import EkiliRelay from 'ekilirelay';
+
+const EmailSender = () => {
+  const [status, setStatus] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const relay = new EkiliRelay(apiKey);
+
+  const handleSendEmail = async () => {
+    if (!apiKey) {
+      setStatus("Please enter your API key.");
+      return;
     }
+    try {
+      const response = await relay.sendEmail(
+        'receiver@example.com',
+        'Test Subject',
+        'This is a test message.',
+        'From: senderName <sender@example.com>'
+      );
+      setStatus(response.status === 'success' ? "Email sent successfully." : `Failed: ${response.message}`);
+    } catch (error) {
+      setStatus(`Error: ${error.message}`);
+    }
+  };
 
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error('Error:', error);
-    throw error;
-  }
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Enter your API key"
+        value={apiKey}
+        onChange={e => setApiKey(e.target.value)}
+      />
+      <button onClick={handleSendEmail}>Send Email</button>
+      <p>{status}</p>
+    </div>
+  );
+};
+
+export default EmailSender;
+```
+
+#### Example Component for Uploading a File
+
+```jsx
+// FileUploader.jsx
+import React, { useState } from 'react';
+import EkiliRelay from 'ekilirelay';
+
+const FileUploader = () => {
+  const [apiKey, setApiKey] = useState('');
+  const [uploadStatus, setUploadStatus] = useState('');
+  const relay = new EkiliRelay(apiKey);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!apiKey) {
+      setUploadStatus("Please enter your API key.");
+      return;
+    }
+    if (!file) {
+      setUploadStatus("No file selected.");
+      return;
+    }
+    setUploadStatus("Uploading...");
+    try {
+      const result = await relay.uploadFile(file);
+      setUploadStatus(result.status === 'success' ? `Uploaded: ${result.filename}, URL: ${result.url}` : `Upload failed: ${result.message}`);
+    } catch (error) {
+      setUploadStatus(`Error: ${error.message}`);
+    }
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Enter your API key"
+        value={apiKey}
+        onChange={e => setApiKey(e.target.value)}
+      />
+      <input type="file" onChange={handleFileChange} />
+      <p>{uploadStatus}</p>
+    </div>
+  );
+};
+
+export default FileUploader;
+```
+
+---
+
+### Next.js
+
+When using Next.js, you can create pages or components that utilize the package. Since Next.js supports both server-side and client-side code, you should use the package on the client side (e.g., within components or pages rendered on the client).
+
+#### Example Next.js Page for Sending an Email
+
+```jsx
+// pages/send-email.js
+import { useState } from 'react';
+import EkiliRelay from 'ekilirelay';
+
+export default function SendEmailPage() {
+  const [apiKey, setApiKey] = useState('');
+  const [message, setMessage] = useState('');
+  const relay = new EkiliRelay(apiKey);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!apiKey) {
+      setMessage("Please enter your API key.");
+      return;
+    }
+    try {
+      const response = await relay.sendEmail(
+        'receiver@example.com',
+        'Test Subject',
+        'This is a test message.',
+        'From: senderName <sender@example.com>'
+      );
+      setMessage(response.status === 'success' ? "Email sent successfully." : `Failed: ${response.message}`);
+    } catch (error) {
+      setMessage(`Error: ${error.message}`);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '2rem auto', padding: '1rem' }}>
+      <h1>Send Email</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Enter your API key"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
+          required
+        />
+        <button type="submit">Send Email</button>
+      </form>
+      <p>{message}</p>
+    </div>
+  );
 }
 ```
 
-### ⚠️ Not Recommended: Client-side Implementation (Insecure)
+#### Example Next.js Page for Uploading a File
 
-```javascript
-// ⚠️ WARNING: This approach exposes your API key in the client!
-// Use server-side implementation instead!
-const sdk = new EkiliRelay("Your-EkiliRelay-Api-Key");
+```jsx
+// pages/upload-file.js
+import { useState } from 'react';
+import EkiliRelay from 'ekilirelay';
 
-sdk.sendEmail(
-  'receiver@example.com', 
-  'Subject', 
-  'Message', 
-  'From: Sender <sender@example.com>'
-)
-  .then(response => {
-    if (response.status === 'success') {
-      console.log('Email sent successfully.');
+export default function UploadFilePage() {
+  const [apiKey, setApiKey] = useState('');
+  const [uploadMessage, setUploadMessage] = useState('');
+  const relay = new EkiliRelay(apiKey);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!apiKey) {
+      setUploadMessage("Please enter your API key.");
+      return;
     }
-  })
-  .catch(console.error);
+    if (!file) {
+      setUploadMessage("No file selected.");
+      return;
+    }
+    setUploadMessage("Uploading...");
+    try {
+      const result = await relay.uploadFile(file);
+      setUploadMessage(result.status === 'success' ? `Uploaded: ${result.filename}, URL: ${result.url}` : `Upload failed: ${result.message}`);
+    } catch (error) {
+      setUploadMessage(`Error: ${error.message}`);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '2rem auto', padding: '1rem' }}>
+      <h1>Upload File</h1>
+      <input
+        type="text"
+        placeholder="Enter your API key"
+        value={apiKey}
+        onChange={(e) => setApiKey(e.target.value)}
+        style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
+        required
+      />
+      <input type="file" onChange={handleFileChange} />
+      <p>{uploadMessage}</p>
+    </div>
+  );
+}
 ```
 
-## Security Best Practices
+---
 
-1. **Never expose API keys in client-side code**
-   - Always keep API keys on the server side
-   - Use environment variables to store sensitive data
-   - Create an API endpoint to handle email sending
+## API Reference
 
-2. **API Route Protection**
-   - Implement rate limiting
-   - Validate all inputs
-   - Use security headers
-   - Configure CORS properly
-   - Add authentication if needed
+### `new EkiliRelay(apiKey: string)`
+Creates a new instance of the EkiliRelay package.
 
-3. **Input Validation**
-   - Validate email addresses
-   - Sanitize message content
-   - Check required fields
-   - Set maximum content length
+- **Parameters:**
+  - `apiKey`: Your EkiliRelay API key used for authenticating requests.
 
-4. **Error Handling**
-   - Implement proper error handling
-   - Don't expose sensitive information in error messages
-   - Log errors securely
-   - Return appropriate HTTP status codes
+### `sendEmail(to: string, subject: string, message: string, headers?: string): Promise<{ status: string; message: string }>`
+Sends an email using the provided details.
 
-## Environment Variables
+- **Parameters:**
+  - `to`: Recipient's email address.
+  - `subject`: Email subject.
+  - `message`: Email body.
+  - `headers` (optional): Additional email headers.
+- **Returns:** A promise that resolves with the API response.
 
-```env
-# .env file
-RELAY_API=your-api-key-here
+### `uploadFile(file: File): Promise<{ status: string; message: string; [key: string]: any }>`
+Uploads a file to the EkiliRelay storage endpoint.
 
-# Optional configuration
-RATE_LIMIT_MAX=100
-RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
-ALLOWED_ORIGINS=https://your-domain.com
-```
-
-## TypeScript Support
-
-This package includes TypeScript types out of the box.
-
-## License
-
-ISC
+- **Parameters:**
+  - `file`: The file to be uploaded.
+- **Returns:** A promise that resolves with the upload result (e.g., filename and URL).
