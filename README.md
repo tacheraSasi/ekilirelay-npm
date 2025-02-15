@@ -26,11 +26,15 @@ After including the SDK, you can start using `ekiliRelay` to send emails. Here's
   
 
   // Initialize the SDK  
-  const sdk = new EkiliRelay();
+  const sdk = new EkiliRelay("Your-EkiliRelay-Api-Key");
 
   sendBtn.addEventListener("click", () => { // Listening to a click event
     // Send an email
-    sdk.sendEmail('reciver-email@example.com', 'Test Subject', 'This is a test message.', 'From: senderName <sender-email@example.com>')
+    sdk.sendEmail(
+      'receiver-email@example.com', 
+      'Test Subject', 
+      'This is a test message.', 
+      'From: senderName <sender-email@example.com>')
       .then(response => {
         if (response.status === 'success') {
           console.log('Email sent successfully.');

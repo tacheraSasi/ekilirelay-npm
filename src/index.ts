@@ -63,6 +63,16 @@ class EkiliRelay {
             return { status: 'error', message: (error as Error).message };
         }
     }
+    
+    async uploadFile(file:any){
+      let formdata = new FormData()
+      formdata.append("file", file)
+      formdata.append("apikey",this.apikey)
+      
+      try{
+        
+      }catch(error){}
+    }
 }
 
 // Export the EkiliRelay class so it can be used in other modules
