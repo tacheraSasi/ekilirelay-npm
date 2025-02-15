@@ -17,20 +17,20 @@ interface ApiError extends Error {
 }
 
 /**
- * The EkiliRelay class is designed to handle email sending functionality
- * using a provided API key. It connects to a remote API endpoint and sends
- * email requests based on the given parameters.
+ * The EkiliRelay class is designed to handle email sending and file upload functionality
+ * using a provided API key. It connects to remote API endpoints and sends requests based
+ * on the given parameters.
  *
- * This class should be initialized with an API key which is used for
- * authenticating requests to the email service.
+ * This class should be initialized with an API key which is used for authenticating
+ * requests to the email service.
  */
 class EkiliRelay {
-  private apikey: string; // The API key required for authenticating requests
-  private apiUrl: string; // The URL of the API endpoint for sending emails
+  private apikey: string;
+  private apiUrl: string;
 
   /**
    * Constructs an instance of the EkiliRelay class.
-   * @param apikey - The API key required for authenticating requests
+   * @param apikey - The API key required for authenticating requests.
    */
   constructor(apikey: string) {
     this.apikey = apikey;
@@ -118,39 +118,40 @@ class EkiliRelay {
     to: string,
     subject: string,
     message: string,
-    headers: string = "",
+    headers: string = ""
   ): Promise<{ status: string; message: string }> {
-    // Construct the payload to be sent to the API
     const data = {
-      to: to, // Recipient's email address
-      subject: subject, // Subject line of the email
-      message: message, // Body of the email
-      headers: headers, // Optional additional headers
-      apikey: this.apikey, // API key for authentication
+      to,
+      subject,
+      message,
+      headers,
+      apikey: this.apikey,
     };
 
     try {
-      // Send the HTTP POST request to the API endpoint with the email data
       const response = await fetch(this.apiUrl, {
-        method: "POST", // HTTP method to use
+        method: "POST",
         headers: {
-          "Content-Type": "application/json", // Specify that we are sending JSON data
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(data), // Convert the data object to a JSON string
+        body: JSON.stringify(data),
       });
-
-      // Parse the JSON response from the server
       const result = await response.json();
-      // Return the result of the email sending operation
+      if (!response.ok) throw new Error(result.message);
       return result;
     } catch (error) {
-      // Return an error object if something goes wrong
       return { status: "error", message: (error as Error).message };
     }
   }
 
-  async uploadFile(file: any) {
-    let formData = new FormData();
+  /**
+   * Uploads a file to the remote storage API.
+   *
+   * @param file - The file to be uploaded.
+   * @returns A promise that resolves to the result of the upload operation.
+   */
+  async uploadFile(file: any): Promise<{ status: string; message: string; [key: string]: any }> {
+    const formData = new FormData();
     formData.append("file", file);
     formData.append("apikey", this.apikey);
 
@@ -160,18 +161,16 @@ class EkiliRelay {
         {
           method: "POST",
           body: formData,
-        },
+        }
       );
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
-      
-      console.log("Upload successful:", result);
+      return result;
     } catch (error) {
-      console.error("Error:", error);
+      return { status: "error", message: (error as Error).message };
     }
   }
 }
 
-// Export the EkiliRelay class so it can be used in other modules
 export default EkiliRelay;
 export type { EmailResponse, EmailRequest, ApiError };
