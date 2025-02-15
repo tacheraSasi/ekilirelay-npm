@@ -72,7 +72,11 @@ declare class EkiliRelay {
      * @returns Promise<EmailResponse> A promise that resolves to the result of the email sending operation
      * @throws {ApiError} If validation fails or request fails
      */
-    sendEmail(to: string, subject: string, message: string, headers?: string): Promise<EmailResponse>;
+    sendEmail(to: string, subject: string, message: string, headers?: string): Promise<{
+        status: string;
+        message: string;
+    }>;
+    uploadFile(file: any): Promise<void>;
 }
 
 export { type ApiError, type EmailRequest, type EmailResponse, EkiliRelay as default };

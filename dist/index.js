@@ -138,5 +138,13 @@ var EkiliRelay = class {
       };
     }
   }
+  async uploadFile(file) {
+    let formdata = new FormData();
+    formdata.append("file", file);
+    formdata.append("apikey", this.apikey);
+    try {
+    } catch (error) {
+    }
+  }
 };
 var index_default = EkiliRelay;
