@@ -72,7 +72,7 @@ class EkiliRelay {
       }
       return result;
     } catch (error) {
-      return { 
+      return {//TODO:Use the interfaces in the types
         status: "error", 
         message: (error as Error).message 
       };
