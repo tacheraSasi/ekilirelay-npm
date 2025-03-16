@@ -49,9 +49,9 @@
     "ekilie email"
   ],
   "devDependencies": {
-    "tsup": "^8.2.3",
-    "typescript": "^5.5.4",
-    "jest": "^29.0.0"
+    "jest": "^29.0.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.5.4"
   },
   "engines": {
     "node": ">=14.0.0"
